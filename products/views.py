@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from .models import Product
@@ -12,6 +12,7 @@ def home(request):
 
 @login_required
 def create(request):
+
     if request.method == 'POST':
         if (request.POST['title'] and request.POST['body'] and
             request.POST['url'] and request.FILES['icon'] and
@@ -29,9 +30,15 @@ def create(request):
             # pub_date - pretty sure this is getting taken care of...
             product.hunter = request.user
             product.save()
-            return redirect('home')
+            return redirect('/products/' + str(product.id))
         else:
             return render(request, 'products/create.html',
                           {'error': "All fields are required."})
     else:
         return render(request, 'products/create.html')
+
+
+def detail(request, product_id):
+
+    product = get_object_or_404(Product, pk=product_id)
+    return render(request, 'products/detail.html', {'product': product})
